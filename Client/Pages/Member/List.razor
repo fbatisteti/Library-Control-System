@@ -1,0 +1,72 @@
+﻿@page "/members"
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Members</li>
+    </ol>
+</nav>
+
+<h3>Members List</h3>
+
+<hr />
+
+<!-- Context Button -->
+<div class="container-fluid">
+    <div class="float-right pb-2">
+        <a class="btn btn-outline-success btn-sm" href="members/add">
+            <span class="oi oi-plus" aria-hidden="true"></span> Add Member
+        </a>
+    </div>
+</div>
+
+<!-- List -->
+<div class="container-fluid">
+    <table class="table table-striped table-sm">
+        <thead class="thead-dark">
+            <tr>
+                <th style="width: 5%;" scope="col">ID</th>
+                <th style="width: 30%;" scope="col">Name</th>
+                <th style="width: 55%;" scope="col">Notes to the Library</th>
+                <th style="width: 10%;" scope="col">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th scope="row">1</th>
+                <td>King Kamehameha, the First</td>
+                <td>1 2</td>
+                <td>
+                    <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details"/>
+                    <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit"/>
+                    <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete"/>
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">2</th>
+                <td>That one guys who shouts at libraries</td>
+                <td>No books</td>
+                <td>
+                    <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
+                    <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
+                    <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
+                </td>
+            </tr>
+            <tr>
+                <th scope="row">3</th>
+                <td>Someone awesome</td>
+                <td>3</td>
+                <td>
+                    <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
+                    <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
+                    <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+@code {
+
+}

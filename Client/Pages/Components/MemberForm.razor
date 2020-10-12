@@ -1,0 +1,32 @@
+﻿<!-- Form template for Member Model -->
+<EditForm Model="@Member" OnValidSubmit="@OnValidSubmit">
+    <!-- Will be using Data Annotations -->
+    <DataAnnotationsValidator />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" class="form-control" @bind-value="@Member.Name">
+                <ValidationMessage For="@( () => Member.Name )" />
+            </div>
+            <div class="form-group">
+                <label>Notes to Library</label>
+                <textarea class="form-control" @bind="@Member.Notes"/>
+            </div>
+
+            <br />
+
+            <button type="submit" class="btn btn-outline-success">
+                @ContextButtonText
+            </button>
+
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public Member Member { get; set; }
+    [Parameter] public string ContextButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+}

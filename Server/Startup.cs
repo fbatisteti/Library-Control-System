@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace Library.Server
 {
@@ -25,6 +26,11 @@ namespace Library.Server
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            // This line sets part of the conversation with the DB
+            services.AddDbContext<AppDbContext> (options =>
+                options.UseMySql(Configuration.GetConnectionString("AppDB"))
+            );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
