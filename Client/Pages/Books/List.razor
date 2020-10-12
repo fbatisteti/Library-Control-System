@@ -1,5 +1,8 @@
 ﻿@page "/books"
+@inject HttpClient crud
+@inject IJSRuntime js
 
+<!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="#">Home</a></li>
@@ -11,59 +14,90 @@
 
 <hr />
 
+<!-- Context Button -->
 <div class="container-fluid">
     <div class="float-right pb-2">
-        <a class="btn btn-outline-success btn-sm" href="members/add">
+        <a class="btn btn-outline-success btn-sm" href="books/add">
             <span class="oi oi-plus" aria-hidden="true"></span> Add New Book
         </a>
     </div>
 </div>
 
+<!-- List -->
 <div class="container-fluid">
-    <table class="table table-striped table-sm">
-        <thead class="thead-dark">
-            <tr>
-                <th style="width: 5%;" scope="col">Reg.</th>
-                <th style="width: 45%;" scope="col">Title</th>
-                <th style="width: 40%;" scope="col">Author(s)</th>
-                <th style="width: 10%;" scope="col">Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <th scope="row">1</th>
-                <td>The Lord of the Rings (Complete Trilogy)</td>
-                <td>J. R. R. Tolkien</td>
-                <td>
-                    <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
-                    <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
-                    <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>The Hitchiker's Guide to the Galaxies</td>
-                <td>Douglas N. Adams</td>
-                <td>
-                    <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
-                    <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
-                    <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
-                </td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td>Necronomicon</td>
-                <td>Someone devilish</td>
-                <td>
-                    <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
-                    <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
-                    <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
-                </td>
-            </tr>
-        </tbody>
-    </table>
+    @if (books == null)
+    {
+        <text>Loading...</text>
+    }
+    else if (books.Count == 0)
+    {
+        <text>No books to show...</text>
+    }
+    else
+    {
+        <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th style="width: 5%;" scope="col">Reg.</th>
+                    <th style="width: 45%;" scope="col">Title</th>
+                    <th style="width: 40%;" scope="col">Author(s)</th>
+                    <th style="width: 10%;" scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <th scope="row">1</th>
+                    <td>The Lord of the Rings (Complete Trilogy)</td>
+                    <td>J. R. R. Tolkien</td>
+                    <td>
+                        <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
+                        <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
+                        <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">2</th>
+                    <td>The Hitchiker's Guide to the Galaxies</td>
+                    <td>Douglas N. Adams</td>
+                    <td>
+                        <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
+                        <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
+                        <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
+                    </td>
+                </tr>
+                <tr>
+                    <th scope="row">3</th>
+                    <td>Necronomicon</td>
+                    <td>Someone devilish</td>
+                    <td>
+                        <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
+                        <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
+                        <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    }
 </div>
 
 @code {
+    List<Book> books { get; set; }
 
+    // This will get ALL member data from DB
+    protected override async Task OnInitializedAsync()
+    {
+        books = await crud.GetFromJsonAsync<List<Book>>("api/Books");
+    }
+
+    // This will prompt a confirmation to delete entry
+    async Task DeleteMember(int BookId)
+    {
+        var book = books.First(x => x.BookId == BookId);
+
+        if (await js.InvokeAsync<bool>("confirm", $"Are you sure you want to delete 's registry?"))
+        {
+            await crud.DeleteAsync($"api/Books/{BookId}");
+            await OnInitializedAsync();
+        }
+    }
 }

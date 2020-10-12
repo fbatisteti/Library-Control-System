@@ -1,4 +1,7 @@
 ﻿@page "/members/add"
+@inject HttpClient crud
+@inject NavigationManager nav
+@inject IJSRuntime js
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
@@ -15,11 +18,17 @@
 
 <!-- Add Form -->
 <MemberForm Member="@member"
-              ContextButtonText="Add Member"
-              OnValidSubmit="@CreateMember" />
+            ContextButtonText="Add Member"
+            OnValidSubmit="@CreateMember" />
 
 @code {
     Member member = new Member();
 
-    public void CreateMember() => Console.WriteLine("teste");
+    // This will add member data on DB
+    async Task CreateMember()
+    {
+        await crud.PostAsJsonAsync("api/Members", member);
+        await js.InvokeVoidAsync("alert", $"New member, {member.Name}, added succesfully!");
+        nav.NavigateTo("members");
+    }
 }

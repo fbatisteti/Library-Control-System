@@ -1,0 +1,9 @@
+﻿@page "/members/details/{MemberId:int}"
+@inject HttpClient crud
+@inject NavigationManager nav
+
+<h3>Details</h3>
+
+@code {
+    [Parameter] public int MemberId { get; set; }
+}

@@ -1,7 +1,43 @@
-﻿@page "/members/edit"
+﻿@page "/members/edit/{MemberId:int}"
+@inject HttpClient crud
+@inject NavigationManager nav
+@inject IJSRuntime js
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="members">Members</a></li>
+        <li class="breadcrumb-item active" aria-current="page">edit</li>
+    </ol>
+</nav>
 
 <h3>Edit Member</h3>
 
-@code {
+<hr />
 
+<!-- Edit Form -->
+<MemberForm Member="@member"
+            ContextButtonText="Add Member"
+            OnValidSubmit="@( () => UpdateMember(MemberId, member) )" />
+
+@code {
+    // This is a parameter for the URL
+    [Parameter] public int MemberId { get; set; }
+
+    Member member = new Member();
+
+    // This will get the member data accordingly to URL
+    protected override async Task OnInitializedAsync()
+    {
+        member = await crud.GetFromJsonAsync<Member>($"api/Members/{MemberId}");
+    }
+
+    // This will update the member data
+    async Task UpdateMember(int Memberid, Member member)
+    {
+        await crud.PutAsJsonAsync<Member>($"api/Members/{MemberId}", member);
+        await js.InvokeVoidAsync("alert", $"Registry updated succesfully!");
+        nav.NavigateTo("members");
+    }
 }

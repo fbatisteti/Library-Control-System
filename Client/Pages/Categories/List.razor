@@ -1,0 +1,110 @@
+﻿@page "/categories"
+@inject HttpClient crud
+@inject IJSRuntime js
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Categories</li>
+    </ol>
+</nav>
+
+<h3>Book Categories</h3>
+
+<hr />
+
+<!-- Input form -->
+<EditForm Model="@category" OnValidSubmit="@OnValidSubmit">
+    <!-- Will be using Data Annotations -->
+    <DataAnnotationsValidator />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" class="form-control" @bind-value="@category.Name">
+                <ValidationMessage For="@( () => category.Name )" />
+            </div>
+
+            <br />
+
+            <button type="submit" class="btn btn-outline-success">
+                Add New Category
+            </button>
+
+        </div>
+    </div>
+</EditForm>
+
+<br />
+
+<!-- List -->
+<div class="container-fluid">
+    @if (categories == null)
+    {
+        <text>Loading...</text>
+    }
+    else if (categories.Count == 0)
+    {
+        <text>No categories to show...</text>
+    }
+    else
+    {
+        <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th style="width: 5%;" scope="col">ID</th>
+                    <th style="width: 85%;" scope="col">Category</th>
+                    <th style="width: 10%;" scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (Category category in categories)
+                {
+                    <tr>
+                        <th scope="row">@category.CategoryId</th>
+                        <td>@category.Name</td>
+                        <td>
+                            <a class="oi oi-trash text-danger" aria-hidden="true" @onclick="@( () => DeleteCategory(category.CategoryId) )" />
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    Category category = new Category();
+    List<Category> categories { get; set; }
+
+    // This will get ALL category data from DB
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await crud.GetFromJsonAsync<List<Category>>("api/Categories");
+    }
+
+    // This will add category data on DB
+    async Task OnValidSubmit()
+    {
+        await crud.PostAsJsonAsync("api/Categories", category);
+        await js.InvokeVoidAsync("alert", $"New category, {category.Name}, added succesfully!");
+
+        category.Name = "";
+        await OnInitializedAsync();
+    }
+
+    // This will prompt a confirmation to delete entry
+    async Task DeleteCategory(int CategoryId)
+    {
+        var cat = categories.First(x => x.CategoryId == CategoryId);
+
+        if (await js.InvokeAsync<bool>("confirm", $"Are you sure you want to delete the \"{cat.Name}\" category?"))
+        {
+            await crud.DeleteAsync($"api/Categories/{CategoryId}");
+            await OnInitializedAsync();
+        }
+    }
+}

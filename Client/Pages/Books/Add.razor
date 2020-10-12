@@ -1,7 +1,29 @@
 ﻿@page "/books/add"
+@inject HttpClient crud
+@inject NavigationManager nav
+@inject IJSRuntime js
 
-<h3>Add Book</h3>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="books">Books</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Add</li>
+    </ol>
+</nav>
+
+<h3>Add Books</h3>
+
+<hr />
 
 @code {
+    Book book = new Book();
 
+    // This will add book data on DB
+    async Task CreateBook()
+    {
+        await crud.PostAsJsonAsync("api/Books", book);
+        await js.InvokeVoidAsync("alert", $"New book, {book.Title}, added succesfully!");
+        nav.NavigateTo("books");
+    }
 }
