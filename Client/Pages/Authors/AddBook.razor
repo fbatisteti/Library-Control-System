@@ -1,4 +1,4 @@
-﻿@page "/authors/edit/{AuthorId:int}"
+﻿@page "/authors/addbook/{AuthorId:int}"
 @inject HttpClient crud
 @inject NavigationManager nav
 @inject IJSRuntime js
@@ -8,18 +8,15 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item"><a href="authors">Authors</a></li>
-        <li class="breadcrumb-item active" aria-current="page">Edit</li>
+        <li class="breadcrumb-item active" aria-current="page">Add Books</li>
     </ol>
 </nav>
 
-<h3>Edit Author</h3>
+<h3>Add Books to Author</h3>
 
 <hr />
 
-<!-- Edit Form -->
-<AuthorForm Author="@author"
-            ContextButtonText="Update Author"
-            OnValidSubmit="@( () => UpdateAuthor(AuthorId, author) )" />
+
 
 @code {
     // This is a parameter for the URL
@@ -34,10 +31,10 @@
     }
 
     // This will update the author data
-    async Task UpdateAuthor(int AuthorId, Author author)
+    async Task UpdateAuthor(int AuthorId, Author Author)
     {
         await crud.PutAsJsonAsync<Author>($"api/Authors/{AuthorId}", author);
-        await js.InvokeVoidAsync("alert", $"Registry updated succesfully!");
+        await js.InvokeVoidAsync("alert", $"Books linked to author succesfully!");
         nav.NavigateTo("authors");
     }
 }

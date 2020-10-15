@@ -1,0 +1,31 @@
+﻿<!-- Form template for Author Model -->
+<EditForm Model="@Author" OnValidSubmit="@OnValidSubmit">
+    <!-- Will be using Data Annotations -->
+    <DataAnnotationsValidator />
+
+    <div class="card">
+        <div class="card-body">
+            <label>First and Last Names</label>
+            <div class="input-group">
+                <input type="text" aria-label="First name" class="form-control" @bind-value="@Author.FirstName">
+                <ValidationMessage For="@( () => Author.FirstName )" />
+
+                <input type="text" aria-label="Last name" class="form-control" @bind-value="@Author.LastName">
+                <ValidationMessage For="@( () => Author.LastName )" />
+            </div>
+
+            <br />
+
+            <button type="submit" class="btn btn-outline-success">
+                @ContextButtonText
+            </button>
+
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter] public Author Author { get; set; }
+    [Parameter] public string ContextButtonText { get; set; } = "Save";
+    [Parameter] public EventCallback OnValidSubmit { get; set; }
+}

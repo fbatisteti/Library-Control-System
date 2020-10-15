@@ -16,13 +16,150 @@
 
 <hr />
 
+<!-- Form for Book Model (couldn't use template) -->
+<EditForm Model="@book" OnValidSubmit="@CreateBook">
+    <!-- Will be using Data Annotations -->
+    <DataAnnotationsValidator />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" class="form-control" @bind-value="@book.Title">
+                <ValidationMessage For="@( () => book.Title )" />
+            </div>
+
+            <div class="form-group">
+                <label>Authors</label>
+                <br />
+
+                <div class="form-check form-check-inline">
+                    @foreach (TempAuthor author in chosenAuthors)
+                    {
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" @bind-value="@author.Checked" />
+                            <label class="form-check-label">@author.FirstName @author.LastName</label>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label>Categories</label>
+                <br />
+
+                <div class="form-check form-check-inline">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox" id="none" value="none">
+                        <label class="text-muted form-check-label" for="none">No category</label>
+                    </div>
+
+                    @foreach (TempCategory category in chosenCategories)
+                    {
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" @bind-value="@category.Checked" />
+                            <label class="form-check-label">@category.Name</label>
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+            <br />
+
+            <button type="submit" class="btn btn-outline-success">
+                Add Book
+            </button>
+
+        </div>
+    </div>
+</EditForm>
+
 @code {
     Book book = new Book();
+
+    // Setting a class and recepient for temporary pickings
+    class TempCategory
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public bool Checked { get; set; }
+    }
+    List<TempCategory> chosenCategories = new List<TempCategory>();
+
+    class TempAuthor
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public bool Checked { get; set; }
+    }
+    List<TempAuthor> chosenAuthors = new List<TempAuthor>();
+
+    // Getting all categories and authors
+    List<Category> categories = new List<Category>();
+    List<Author> authors = new List<Author>();
+    protected override async Task OnInitializedAsync()
+    {
+        categories = await crud.GetFromJsonAsync<List<Category>>("api/Categories");
+        authors = await crud.GetFromJsonAsync<List<Author>>("api/Authors");
+
+        // Creating a temporary listing for categories and authors
+        foreach (Category category in categories)
+        {
+            chosenCategories.Add(new TempCategory {
+                Id = category.CategoryId,
+                Name = category.Name,
+                Checked = false
+            });
+        }
+
+        foreach (Author author in authors)
+        {
+            chosenAuthors.Add(new TempAuthor {
+                Id = author.AuthorId,
+                FirstName = author.FirstName,
+                LastName = author.LastName,
+                Checked = false
+            });
+        }
+    }
 
     // This will add book data on DB
     async Task CreateBook()
     {
+        book.Custody = null;
         await crud.PostAsJsonAsync("api/Books", book);
+
+        // After sending the book data to DB, it will get that book data (last one added) and mess with the Many-to-Many relationships
+        List<Book> temp = await crud.GetFromJsonAsync<List<Book>>("api/Books");
+        var lastItem = temp[temp.Count - 1];
+        foreach (TempCategory category in chosenCategories)
+        {
+            if (category.Checked == true)
+            {
+                BookCategory bookcategory = new BookCategory();
+                bookcategory.BookId = lastItem.BookId;
+                bookcategory.CategoryId = category.Id;
+
+                await crud.PostAsJsonAsync("api/BookCategories", bookcategory);
+            }
+        }
+        foreach (TempAuthor author in chosenAuthors)
+        {
+            if (author.Checked == true)
+            {
+                AuthorBook authorbook = new AuthorBook();
+                authorbook.BookId = lastItem.BookId;
+                authorbook.AuthorId = author.Id;
+
+                await crud.PostAsJsonAsync("api/AuthorBooks", authorbook);
+            }
+        }
+
+        // Finally, it states it's done
         await js.InvokeVoidAsync("alert", $"New book, {book.Title}, added succesfully!");
         nav.NavigateTo("books");
     }

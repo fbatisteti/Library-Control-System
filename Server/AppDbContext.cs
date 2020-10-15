@@ -18,7 +18,8 @@ namespace Library.Server
         public DbSet<Category> Categories { get; set; }
         public DbSet<Member> Members { get; set; }
 
-        // This here is a list for the "many to many" extra tables
+        // This here is a list for the accessable "many to many" extra tables
         public DbSet<AuthorBook> AuthorBooks { get; set; }
+        public DbSet<BookCategory> BookCategories { get; set; }
     }
 }

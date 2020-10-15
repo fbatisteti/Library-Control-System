@@ -1,5 +1,98 @@
-﻿<h3>List</h3>
+﻿@page "/authors"
+@inject HttpClient crud
+@inject IJSRuntime js
+@inject NavigationManager nav
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Authors</li>
+    </ol>
+</nav>
+
+<h3>Authors List</h3>
+
+<hr />
+
+<!-- Add Form -->
+<AuthorForm Author="@author"
+            ContextButtonText="Add Author"
+            OnValidSubmit="@CreateAuthor" />
+
+<br />
+
+<!-- List -->
+<div class="container-fluid">
+    @if (authors == null)
+    {
+        <text>Loading...</text>
+    }
+    else if (authors.Count == 0)
+    {
+        <text>No authors to show...</text>
+    }
+    else
+    {
+        <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th style="width: 5%;" scope="col">ID</th>
+                    <th style="width: 85%;" scope="col">Name</th>
+                    <th style="width: 10%;" scope="col">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                @foreach (Author author in authors)
+                {
+                    <tr>
+                        <th scope="row">@author.AuthorId</th>
+                        <td>@author.FirstName @author.LastName</td>
+                        <td>
+                            <a class="oi oi-book text-primary" aria-hidden="true" href="authors/addbook/@author.AuthorId" />
+                            <a class="oi oi-pencil text-warning" aria-hidden="true" href="authors/edit/@author.AuthorId" />
+                            <a class="oi oi-trash text-danger" aria-hidden="true" href="authors/delete/@author.AuthorId" />
+                            <a class="oi oi-trash text-danger" aria-hidden="true" @onclick="@( () => DeleteAuthor(author.AuthorId) )" />
+                        </td>
+                    </tr>
+                }
+
+            </tbody>
+        </table>
+    }
+</div>
 
 @code {
+    List<Author> authors { get; set; }
+    Author author = new Author();
 
+    // This will get ALL autorh data from DB
+    protected override async Task OnInitializedAsync()
+    {
+        authors = await crud.GetFromJsonAsync<List<Author>>("api/Authors");
+    }
+
+    // This will prompt a confirmation to delete entry
+    async Task DeleteAuthor(int AuthorId)
+    {
+        var author = authors.First(x => x.AuthorId == AuthorId);
+
+        if (await js.InvokeAsync<bool>("confirm", $"Are you sure you want to delete author {author.FirstName} {author.LastName} from registers?"))
+        {
+            await crud.DeleteAsync($"api/Authors/{AuthorId}");
+            await OnInitializedAsync();
+        }
+    }
+
+    // This will add author data on DB
+    async Task CreateAuthor()
+    {
+        await crud.PostAsJsonAsync("api/Authors", author);
+        await js.InvokeVoidAsync("alert", $"New author, {author.FirstName} {author.LastName}, added succesfully!");
+
+        author.FirstName = "";
+        author.LastName = "";
+        await OnInitializedAsync();
+    }
 }

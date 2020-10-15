@@ -8,7 +8,7 @@
     <ol class="breadcrumb">
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item"><a href="members">Members</a></li>
-        <li class="breadcrumb-item active" aria-current="page">edit</li>
+        <li class="breadcrumb-item active" aria-current="page">Edit</li>
     </ol>
 </nav>
 
@@ -18,7 +18,7 @@
 
 <!-- Edit Form -->
 <MemberForm Member="@member"
-            ContextButtonText="Add Member"
+            ContextButtonText="Update Member"
             OnValidSubmit="@( () => UpdateMember(MemberId, member) )" />
 
 @code {
@@ -34,7 +34,7 @@
     }
 
     // This will update the member data
-    async Task UpdateMember(int Memberid, Member member)
+    async Task UpdateMember(int MemberId, Member member)
     {
         await crud.PutAsJsonAsync<Member>($"api/Members/{MemberId}", member);
         await js.InvokeVoidAsync("alert", $"Registry updated succesfully!");

@@ -13,11 +13,9 @@ namespace Library.Shared.Models
         [Display (Name = "Title")]
         public string Title { get; set; }
 
-        [Required (ErrorMessage = "Please select at least 1 (one) author")]
-        [Display (Name = "Author(s)")]
         public IList<AuthorBook> AuthorBooks { get; set; }
         
-        public IList<Category> Categories { get; set; }
+        public IList<BookCategory> BookCategories { get; set; }
         
         public Member Custody { get; set; }
     }

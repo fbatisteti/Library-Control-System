@@ -3,14 +3,16 @@ using System;
 using Library.Server;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Library.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20201013232919_MtoNchanges")]
+    partial class MtoNchanges
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -77,31 +79,13 @@ namespace Library.Server.Migrations
                     b.ToTable("Books");
                 });
 
-            modelBuilder.Entity("Library.Shared.Models.BookCategory", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    b.Property<int>("BookId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BookId");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("BookCategories");
-                });
-
             modelBuilder.Entity("Library.Shared.Models.Category", b =>
                 {
                     b.Property<int>("CategoryId")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<int?>("BookId")
                         .HasColumnType("int");
 
                     b.Property<string>("Name")
@@ -109,6 +93,8 @@ namespace Library.Server.Migrations
                         .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("CategoryId");
+
+                    b.HasIndex("BookId");
 
                     b.ToTable("Categories");
                 });
@@ -153,19 +139,11 @@ namespace Library.Server.Migrations
                         .HasForeignKey("CustodyMemberId");
                 });
 
-            modelBuilder.Entity("Library.Shared.Models.BookCategory", b =>
+            modelBuilder.Entity("Library.Shared.Models.Category", b =>
                 {
-                    b.HasOne("Library.Shared.Models.Book", "Book")
-                        .WithMany("BookCategories")
-                        .HasForeignKey("BookId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Library.Shared.Models.Category", "Category")
-                        .WithMany("BookCategories")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.HasOne("Library.Shared.Models.Book", null)
+                        .WithMany("Categories")
+                        .HasForeignKey("BookId");
                 });
 #pragma warning restore 612, 618
         }
