@@ -50,10 +50,10 @@
                         <th scope="row">@author.AuthorId</th>
                         <td>@author.FirstName @author.LastName</td>
                         <td>
-                            <a class="oi oi-book text-primary" aria-hidden="true" href="authors/addbook/@author.AuthorId" />
-                            <a class="oi oi-pencil text-warning" aria-hidden="true" href="authors/edit/@author.AuthorId" />
-                            <a class="oi oi-trash text-danger" aria-hidden="true" href="authors/delete/@author.AuthorId" />
-                            <a class="oi oi-trash text-danger" aria-hidden="true" @onclick="@( () => DeleteAuthor(author.AuthorId) )" />
+                            <a class="oi oi-book text-primary" aria-hidden="true"
+                               href="authors/managebooks/@author.AuthorId" title="Manage books"/>
+                            <a class="oi oi-pencil text-warning" aria-hidden="true"
+                               href="authors/edit/@author.AuthorId" title="Edit author"/>
                         </td>
                     </tr>
                 }
@@ -71,18 +71,6 @@
     protected override async Task OnInitializedAsync()
     {
         authors = await crud.GetFromJsonAsync<List<Author>>("api/Authors");
-    }
-
-    // This will prompt a confirmation to delete entry
-    async Task DeleteAuthor(int AuthorId)
-    {
-        var author = authors.First(x => x.AuthorId == AuthorId);
-
-        if (await js.InvokeAsync<bool>("confirm", $"Are you sure you want to delete author {author.FirstName} {author.LastName} from registers?"))
-        {
-            await crud.DeleteAsync($"api/Authors/{AuthorId}");
-            await OnInitializedAsync();
-        }
     }
 
     // This will add author data on DB

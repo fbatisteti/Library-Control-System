@@ -67,7 +67,9 @@
                         <th scope="row">@category.CategoryId</th>
                         <td>@category.Name</td>
                         <td>
-                            <a class="oi oi-trash text-danger" aria-hidden="true" @onclick="@( () => DeleteCategory(category.CategoryId) )" />
+                            <a class="oi oi-trash text-danger" aria-hidden="true"
+                               @onclick="@( () => DeleteCategory(category.CategoryId) )"
+                               title="Delete category"/>
                         </td>
                     </tr>
                 }

@@ -39,42 +39,49 @@
             <thead class="thead-dark">
                 <tr>
                     <th style="width: 5%;" scope="col">Reg.</th>
-                    <th style="width: 45%;" scope="col">Title</th>
-                    <th style="width: 40%;" scope="col">Author(s)</th>
+                    <th style="width: 35%;" scope="col">Title</th>
+                    <th style="width: 50%;" scope="col">Author(s)</th>
                     <th style="width: 10%;" scope="col">Actions</th>
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <th scope="row">1</th>
-                    <td>The Lord of the Rings (Complete Trilogy)</td>
-                    <td>J. R. R. Tolkien</td>
-                    <td>
-                        <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
-                        <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
-                        <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">2</th>
-                    <td>The Hitchiker's Guide to the Galaxies</td>
-                    <td>Douglas N. Adams</td>
-                    <td>
-                        <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
-                        <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
-                        <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
-                    </td>
-                </tr>
-                <tr>
-                    <th scope="row">3</th>
-                    <td>Necronomicon</td>
-                    <td>Someone devilish</td>
-                    <td>
-                        <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details" />
-                        <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit" />
-                        <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete" />
-                    </td>
-                </tr>
+
+                <!-- Basically, gets the BOOK to show book data... -->
+                @foreach (Book book in books)
+                {
+                    <tr>
+                        <!-- ... print basic stuff... -->
+                        <th scope="row">@book.BookId</th>
+                        <td>@book.Title</td>
+                        <td>
+
+                            <!-- ... then checks all the AUTHORBOOKS relations... -->
+                            @foreach (AuthorBook authorbook in authorbooks)
+                            {
+                                <!-- ... to see if it has someone linked to the book... -->
+                                if (authorbook.BookId == book.BookId)
+                                {
+                                    <!-- ... and, if it does, check all the AUTHORS... -->
+                                    foreach (Author author in authors)
+                                    {
+                                        <!-- ... and compare with the author's id in the relations... -->
+                                        if (authorbook.AuthorId == author.AuthorId)
+                                        {
+                                            <!-- ... to, finally, print some more stuff -->
+                                            <spam>@author.FirstName @author.LastName |</spam>
+                                        }
+                                    }
+                                }
+                            }
+                        </td>
+                        <td>
+                            <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="books/details" />
+                            <a class="oi oi-pencil text-warning" aria-hidden="true" href="books/edit" />
+                            <a class="oi oi-trash text-danger" aria-hidden="true" href="books/delete" />
+                        </td>
+                    </tr>
+                }
+
             </tbody>
         </table>
     }
@@ -82,11 +89,15 @@
 
 @code {
     List<Book> books { get; set; }
+    List<Author> authors { get; set; }
+    List<AuthorBook> authorbooks { get; set; }
 
-    // This will get ALL member data from DB
+    // This will get ALL book data from DB... and authors and the author-book relations
     protected override async Task OnInitializedAsync()
     {
         books = await crud.GetFromJsonAsync<List<Book>>("api/Books");
+        authors = await crud.GetFromJsonAsync<List<Author>>("api/Authors");
+        authorbooks = await crud.GetFromJsonAsync<List<AuthorBook>>("api/AuthorBooks");
     }
 
     // This will prompt a confirmation to delete entry

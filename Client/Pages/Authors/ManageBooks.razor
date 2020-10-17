@@ -1,0 +1,218 @@
+﻿@page "/authors/managebooks/{AuthorId:int}"
+@inject HttpClient crud
+@inject NavigationManager nav
+@inject IJSRuntime js
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="authors">Authors</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Manage Books</li>
+    </ol>
+</nav>
+
+<h3>Manage @author.FirstName @author.LastName's Books</h3>
+
+<hr />
+
+<!-- Linked List -->
+<h4>Linked books</h4>
+<div class="container-fluid">
+    @if (books == null)
+    {
+        <text>Loading...</text>
+    }
+    else if (books.Count == 0)
+    {
+        <text>No books to show...</text>
+    }
+    else
+    {
+        <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th style="width: 5%;" scope="col">Reg.</th>
+                    <th style="width: 35%;" scope="col">Title</th>
+                    <th style="width: 50%;" scope="col">Author(s)</th>
+                    <th style="width: 10%;" scope="col">Remove?</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <!-- Basically, checks all the AUTHORBOOKS relations... -->
+                @foreach (AuthorBook authorbook in authorbooks)
+                {
+                    <!-- ... to find the page's author... -->
+                    if (authorbook.AuthorId == author.AuthorId)
+                    {
+                        <!-- ... to get that entry's book data... -->
+                        foreach (Book book in books)
+                        {
+                            if (book.BookId == authorbook.BookId)
+                            {
+                                <!-- ... and print the table row -->
+                                <tr>
+                                    <th scope="row">@book.BookId</th>
+                                    <td>@book.Title</td>
+                                    <td>
+                                        @foreach (AuthorBook authorbook2 in authorbooks)
+                                        {
+                                            if (authorbook2.BookId == book.BookId)
+                                            {
+                                                foreach (Author author2 in authors)
+                                                {
+                                                    if (author2.AuthorId == authorbook2.AuthorId)
+                                                    {
+                                                        if (@author.AuthorId == author2.AuthorId)
+                                                        {
+                                                            <spam class="text-muted">@author2.FirstName @author2.LastName |</spam>
+                                                        }
+                                                        else
+                                                        {
+                                                            <spam>@author2.FirstName @author2.LastName |</spam>
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        <a class="oi oi-action-undo text-danger" aria-hidden="true"
+                                           @onclick="@( () => RemoveBook(book.BookId, author.AuthorId) )" title="Remove from author"/>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    }
+                }
+
+            </tbody>
+        </table>
+    }
+</div>
+
+<!-- Unlinked List -->
+<h4>Unlinked books</h4>
+<div class="container-fluid">
+    @if (books == null)
+    {
+        <text>Loading...</text>
+    }
+    else if (books.Count == 0)
+    {
+        <text>No books to show...</text>
+    }
+    else
+    {
+        <table class="table table-striped table-sm">
+            <thead class="thead-dark">
+                <tr>
+                    <th style="width: 5%;" scope="col">Reg.</th>
+                    <th style="width: 35%;" scope="col">Title</th>
+                    <th style="width: 50%;" scope="col">Author(s)</th>
+                    <th style="width: 10%;" scope="col">Add?</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <!-- Basically, checks all the books... -->
+                @foreach (Book book in books)
+                {
+                    var show = true;
+
+                    <!-- ... to see if it is the author's... -->
+                    foreach (AuthorBook authorbook in authorbooks)
+                    {
+                        if (authorbook.BookId == book.BookId && authorbook.AuthorId == author.AuthorId)
+                        {
+                            show = false;
+                        }
+                    }
+
+                    <!-- ... and, if not, print it -->
+                    if (show)
+                    {
+                        <tr>
+                            <th scope="row">@book.BookId</th>
+                            <td>@book.Title</td>
+                            <td>
+                                @foreach (AuthorBook authorbook2 in authorbooks)
+                                {
+                                    if (authorbook2.BookId == book.BookId)
+                                    {
+                                        foreach (Author author2 in authors)
+                                        {
+                                            if (author2.AuthorId == authorbook2.AuthorId)
+                                            {
+                                                <spam>@author2.FirstName @author2.LastName |</spam>
+                                            }
+                                        }
+                                    }
+                                }
+                            </td>
+                            <td>
+                                <a class="oi oi-action-redo text-success" aria-hidden="true"
+                                   @onclick="@( () => AddBook(book.BookId, author.AuthorId) )" title="Add to author" />
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+        </table>
+    }
+</div>
+
+@code {
+    // This is a parameter for the URL
+    [Parameter] public int AuthorId { get; set; }
+
+    Author author = new Author();
+    List<Author> authors = new List<Author>();
+    Book book = new Book();
+    List<Book> books = new List<Book>();
+    AuthorBook authorbook = new AuthorBook();
+    List<AuthorBook> authorbooks = new List<AuthorBook>();
+
+    // This will get the author data accordingly to URL, all books, all (other) authors, and their relations
+    protected override async Task OnInitializedAsync()
+    {
+        author = await crud.GetFromJsonAsync<Author>($"api/Authors/{AuthorId}");
+        books = await crud.GetFromJsonAsync<List<Book>>("api/Books");
+        authors = await crud.GetFromJsonAsync<List<Author>>("api/Authors");
+        authorbooks = await crud.GetFromJsonAsync<List<AuthorBook>>("api/AuthorBooks");
+    }
+
+    // This will update the author data
+    async Task UpdateAuthor(int AuthorId, Author Author)
+    {
+        await crud.PutAsJsonAsync<Author>($"api/Authors/{AuthorId}", author);
+        await js.InvokeVoidAsync("alert", $"Books linked to author succesfully!");
+        nav.NavigateTo("authors");
+    }
+
+    // This will update the relations between the author and books
+    async Task AddBook(int BookId, int AuthorId)
+    {
+        authorbook.AuthorId = AuthorId;
+        authorbook.BookId = BookId;
+
+        await crud.PostAsJsonAsync<AuthorBook>("api/AuthorBooks", authorbook);
+        await OnInitializedAsync();
+    }
+
+    async Task RemoveBook(int BookId, int AuthorId)
+    {
+        Console.WriteLine("A");
+        foreach (AuthorBook authorbook in authorbooks)
+        {
+            Console.WriteLine("B");
+            if (authorbook.AuthorId == AuthorId && authorbook.BookId == BookId)
+            {
+                Console.WriteLine("C");
+                await crud.DeleteAsync($"api/AuthorBooks/{authorbook.Id}");
+                await OnInitializedAsync();
+            }
+        }
+    }
+}
