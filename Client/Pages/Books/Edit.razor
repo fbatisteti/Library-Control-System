@@ -1,7 +1,229 @@
-﻿@page "/books/edit"
+﻿@page "/books/edit/{BookId:int}"
+@inject HttpClient crud
+@inject NavigationManager nav
+@inject IJSRuntime js
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="books">Books</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Edit</li>
+    </ol>
+</nav>
 
 <h3>Edit Book</h3>
 
-@code {
+<hr />
 
+<!-- Form for Book Model (couldn't use template) -->
+<EditForm Model="@book" OnValidSubmit="@CreateBook">
+    <!-- Will be using Data Annotations -->
+    <DataAnnotationsValidator />
+
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <label>Title</label>
+                <input type="text" class="form-control" @bind-value="@book.Title">
+                <ValidationMessage For="@( () => book.Title )" />
+            </div>
+
+            <div class="form-group">
+                <label>Authors</label>
+                <br />
+
+                <div class="form-check form-check-inline">
+                    @foreach (TempAuthor author in chosenAuthors)
+                    {
+                        <div class="form-check form-check-inline">
+                            @if (author.Checked)
+                            {
+                                <input checked class="form-check-input" type="checkbox" @bind-value="@author.Checked" />
+                            }
+                            else
+                            {
+                                <input class="form-check-input" type="checkbox" @bind-value="@author.Checked" />
+                            }
+                            <label class="form-check-label">@author.FirstName @author.LastName</label>
+                        </div>
+                    }
+                </div>
+
+            </div>
+
+            <div class="form-group">
+                <label>Categories</label>
+                <br />
+
+                <div class="form-check form-check-inline">
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="checkbox">
+                        <label class="text-muted form-check-label">No category</label>
+                    </div>
+
+                    @foreach (TempCategory category in chosenCategories)
+                    {
+                        <div class="form-check form-check-inline">
+                            @if (category.Checked)
+                            {
+                                <input checked class="form-check-input" type="checkbox" @bind-value="@category.Checked" />
+                            }
+                            else
+                            {
+                                <input class="form-check-input" type="checkbox" @bind-value="@category.Checked" />
+                            }
+                            <label class="form-check-label">@category.Name</label>
+                        </div>
+                    }
+
+                </div>
+
+            </div>
+
+            <br />
+
+            <button type="submit" class="btn btn-outline-success">
+                Add Book
+            </button>
+
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    // This is a parameter for the URL
+    [Parameter] public int BookId { get; set; }
+
+    Book book = new Book();
+    List<AuthorBook> authorbooks = new List<AuthorBook>();
+    List<BookCategory> bookcategories = new List<BookCategory>();
+    List<Category> categories = new List<Category>();
+    List<Author> authors = new List<Author>();
+
+    // Setting a class and recepient for temporary pickings
+    class TempCategory
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public bool Checked { get; set; }
+    }
+    List<TempCategory> chosenCategories = new List<TempCategory>();
+
+    class TempAuthor
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public bool Checked { get; set; }
+    }
+    List<TempAuthor> chosenAuthors = new List<TempAuthor>();
+
+    // Getting all categories and authors, and editable book data and all relations
+    public bool CheckCategories(Category category)
+    {
+        foreach (BookCategory bookcategory in bookcategories)
+        {
+            if (bookcategory.BookId == book.BookId && bookcategory.CategoryId == category.CategoryId)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public bool CheckAuthors(Author author)
+    {
+        foreach (AuthorBook authorbook in authorbooks)
+        {
+            if (authorbook.BookId == book.BookId && authorbook.AuthorId == author.AuthorId)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        book = await crud.GetFromJsonAsync<Book>($"api/Books/{BookId}");
+        authorbooks = await crud.GetFromJsonAsync<List<AuthorBook>>("api/AuthorBooks");
+        bookcategories = await crud.GetFromJsonAsync<List<BookCategory>>("api/BookCategories");
+
+        categories = await crud.GetFromJsonAsync<List<Category>>("api/Categories");
+        authors = await crud.GetFromJsonAsync<List<Author>>("api/Authors");
+
+        // Creating a temporary listing for categories and authors
+        foreach (Category category in categories)
+        {
+            chosenCategories.Add(new TempCategory
+            {
+                Id = category.CategoryId,
+                Name = category.Name,
+                Checked = CheckCategories(category)
+            });
+        }
+
+        foreach (Author author in authors)
+        {
+            chosenAuthors.Add(new TempAuthor
+            {
+                Id = author.AuthorId,
+                FirstName = author.FirstName,
+                LastName = author.LastName,
+                Checked = CheckAuthors(author)
+            });
+        }
+    }
+
+    // This will update book data on DB
+    async Task CreateBook()
+    {
+        await crud.PutAsJsonAsync($"api/Books/{book.BookId}", book);
+
+        // Clear all relations and repost them in DB
+        foreach (BookCategory bookcategory in bookcategories)
+        {
+            if (bookcategory.BookId == book.BookId)
+            {
+                await crud.DeleteAsync($"api/BookCategories/{bookcategory.Id}");
+            }
+        }
+
+        foreach (TempCategory category in chosenCategories)
+        {
+            if (category.Checked == true)
+            {
+                BookCategory bookcategory = new BookCategory();
+                bookcategory.BookId = book.BookId;
+                bookcategory.CategoryId = category.Id;
+
+                await crud.PostAsJsonAsync("api/BookCategories", bookcategory);
+            }
+        }
+
+        foreach (AuthorBook authorbook in authorbooks)
+        {
+            if (authorbook.BookId == book.BookId)
+            {
+                await crud.DeleteAsync($"api/AuthorBooks/{authorbook.Id}");
+            }
+        }
+
+        foreach (TempAuthor author in chosenAuthors)
+        {
+            if (author.Checked == true)
+            {
+                AuthorBook authorbook = new AuthorBook();
+                authorbook.BookId = book.BookId;
+                authorbook.AuthorId = author.Id;
+
+                await crud.PostAsJsonAsync("api/AuthorBooks", authorbook);
+            }
+        }
+
+        // Finally, it states it's done
+        await js.InvokeVoidAsync("alert", $"Book updated succesfully!");
+        nav.NavigateTo("books");
+    }
 }
