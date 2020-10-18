@@ -1,0 +1,111 @@
+﻿@page "/transit"
+@inject HttpClient crud
+@inject NavigationManager nav
+
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Transit</li>
+    </ol>
+</nav>
+
+<h3>Book Transit</h3>
+
+<hr />
+
+<div class="container">
+    <div class="row">
+
+        <!-- Members -->
+        <div class="col-6">
+            <h5>Members</h5>
+            <hr />
+
+            <div class="form-group">
+                <select class="form-control" @bind="selectedMember">
+
+                    <option selected class="text-muted" value="">Select a member</option>
+
+                    @foreach (Member member in members)
+                    {
+                        <option value="@member.MemberId">@member.Name</option>
+                    }
+
+                </select>
+            </div>
+
+        </div>
+
+        <!-- Books -->
+        <div class="col-6">
+            <h5>Books</h5>
+            <hr />
+
+            <div class="form-group">
+                <select class="form-control" @bind="selectedBook">
+
+                    <option selected class="text-muted">Select a book</option>
+
+                    @foreach (Book book in books)
+                    {
+                        <option value="@book.BookId">@book.Title</option>
+                    }
+
+                </select>
+            </div>
+
+        </div>
+
+        <!-- Context Button -->
+        <div class="container-fluid">
+            <div class="float-right pb-2">
+                <a class="btn btn-outline-success btn-sm" @onclick="@( () => Rent(selectedMember, selectedBook) )">
+                    <span class="oi oi-loop" aria-hidden="true"></span> Rent book
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    Book book = new Book();
+    List<Book> books = new List<Book>();
+    Member member = new Member();
+    List<Member> members = new List<Member>();
+
+    int selectedMember;
+    int selectedBook;
+
+    // This will get members and book data from DB
+    protected override async Task OnInitializedAsync()
+    {
+        members = await crud.GetFromJsonAsync<List<Member>>("api/Members");
+        books = await crud.GetFromJsonAsync<List<Book>>("api/Books");
+    }
+
+    // These will make the connections between book and member
+    protected async Task SetParameters(int memberId, int bookId)
+    {
+        member = await crud.GetFromJsonAsync<Member>($"api/Members/{memberId}");
+        book = await crud.GetFromJsonAsync<Book>($"api/Books/{bookId}");
+    }
+
+    protected async Task Update(int memberId, int bookId)
+    {
+        await crud.PutAsJsonAsync<Member>($"api/Members/{memberId}", member);
+        await crud.PutAsJsonAsync<Book>($"api/Books/{bookId}", book);
+    }
+
+    public void Rent(int memberId, int bookId)
+    {
+        SetParameters(memberId, bookId);
+
+        member.Books.Add(book);
+        book.Custody = member;
+
+        Update(memberId, bookId);
+
+        nav.NavigateTo("/transit");
+    }
+}

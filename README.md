@@ -1,3 +1,9 @@
+TODO
+- confirmar exclusão e retirar de todas as tabelas
+- arrumar para mobile
+- dashboard
+- links em todo lugar
+
 # Library Control System
 
 Simple system to control book flux in a library. Made for college. Won't be updating

@@ -2,8 +2,72 @@
 @inject HttpClient crud
 @inject NavigationManager nav
 
-<h3>Details</h3>
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="#">Home</a></li>
+        <li class="breadcrumb-item"><a href="members">Members</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Details</li>
+    </ol>
+</nav>
+
+<h3>Details - @member.Name</h3>
+
+<hr />
+
+<!-- Notes -->
+<div class="card">
+    <div class="card-header">
+        Important
+    </div>
+    <div class="card-body">
+        <p class="card-text">@member.Notes</p>
+    </div>
+</div>
+
+<br />
+
+<!-- History -->
+<div class="card">
+    <div class="card-header">
+        Books in Custody
+    </div>
+    <div class="card-body">
+        <p class="card-text">
+
+            <table class="table table-striped table-sm">
+                <thead class="thead-dark">
+                    <tr>
+                        <th style="width: 5%;" scope="col">Reg.</th>
+                        <th style="width: 35%;" scope="col">Title</th>
+                        <th style="width: 60%;" scope="col">Author(s)</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    A
+
+                </tbody>
+            </table>
+
+        </p>
+    </div>
+</div>
+
 
 @code {
     [Parameter] public int MemberId { get; set; }
+
+    Member member = new Member();
+    List<AuthorBook> authorbooks = new List<AuthorBook>();
+    List<Author> authors = new List<Author>();
+    List<Book> books = new List<Book>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        member = await crud.GetFromJsonAsync<Member>($"api/Members/{MemberId}");
+        authorbooks = await crud.GetFromJsonAsync<List<AuthorBook>>("api/AuthorBooks");
+        authors = await crud.GetFromJsonAsync<List<Author>>("api/Authors");
+        books = await crud.GetFromJsonAsync<List<Book>>("api/Books");
+    }
 }
