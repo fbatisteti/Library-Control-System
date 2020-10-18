@@ -50,10 +50,6 @@
                 <br />
 
                 <div class="form-check form-check-inline">
-                    <div class="form-check form-check-inline">
-                        <input class="form-check-input" type="checkbox" id="none" value="none">
-                        <label class="text-muted form-check-label" for="none">No category</label>
-                    </div>
 
                     @foreach (TempCategory category in chosenCategories)
                     {
@@ -130,7 +126,7 @@
     // This will add book data on DB
     async Task CreateBook()
     {
-        book.Custody = null;
+        book.MemberId = 1;
         await crud.PostAsJsonAsync("api/Books", book);
 
         // After sending the book data to DB, it will get that book data (last one added) and mess with the Many-to-Many relationships

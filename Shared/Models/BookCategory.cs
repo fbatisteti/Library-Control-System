@@ -12,24 +12,5 @@ namespace Library.Shared.Models
         public Book Book { get; set; }
         public int CategoryId { get; set; }
         public Category Category { get; set; }
-
-        // This is for the One-to-Many Relationship to work
-        protected void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            // Setting PK
-            modelBuilder.Entity<BookCategory>()
-                .HasKey(bc => new { bc.BookId, bc.CategoryId });
-
-            // Setting FKs
-            modelBuilder.Entity<BookCategory>()
-                .HasOne(bc => bc.Book)
-                .WithMany(b => b.BookCategories)
-                .HasForeignKey(bc => bc.BookId);
-
-            modelBuilder.Entity<BookCategory>()
-                .HasOne(bc => bc.Category)
-                .WithMany(c => c.BookCategories)
-                .HasForeignKey(bc => bc.CategoryId);
-        }
     }
 }
