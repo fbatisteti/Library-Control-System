@@ -58,13 +58,23 @@ namespace Library.Server
                 .HasForeignKey(ab => ab.BookId);
 
             // BOOK - MEMBER
-            modelBuilder.Entity<Book>()
-                .HasOne(b => b.Custody)
-                .WithMany(m => m.Books);
-
             modelBuilder.Entity<Member>()
                 .HasMany(m => m.Books)
-                .WithOne(b => b.Custody);
+                .WithOne(b => b.Member);
+
+            modelBuilder.Entity<Book>()
+                .HasOne(b => b.Member)
+                .WithMany(m => m.Books);
+
+            // SEEDING
+            modelBuilder.Entity<Member>()
+                .HasData(
+                    new Member
+                    {
+                        MemberId = 1,
+                        Name = "[System Member]"
+                    }
+            );
         }
     }
 }

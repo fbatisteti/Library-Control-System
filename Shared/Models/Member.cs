@@ -16,14 +16,6 @@ namespace Library.Shared.Models
 
         public string Notes { get; set; }
 
-        public ICollection<Book> Books { get; set; }
-
-        // This is for the One-to-Many Relationship to work
-        protected void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Member>()
-                .HasMany(m => m.Books)
-                .WithOne(b => b.Custody);
-        }
+        public IList<Book> Books { get; set; }
     }
 }

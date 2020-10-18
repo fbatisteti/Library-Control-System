@@ -1,6 +1,7 @@
 ﻿@page "/transit"
 @inject HttpClient crud
 @inject NavigationManager nav
+@inject IJSRuntime js
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
@@ -14,7 +15,10 @@
 
 <hr />
 
+<!-- Transit -->
 <div class="container">
+    <!-- Outgoing books -->
+    <h4>Book Rental</h4>
     <div class="row">
 
         <!-- Members -->
@@ -49,7 +53,10 @@
 
                     @foreach (Book book in books)
                     {
-                        <option value="@book.BookId">@book.Title</option>
+                        if (book.MemberId == 1)
+                        {
+                            <option value="@book.BookId">@book.Title</option>
+                        }
                     }
 
                 </select>
@@ -64,6 +71,37 @@
                     <span class="oi oi-loop" aria-hidden="true"></span> Rent book
                 </a>
             </div>
+        </div>
+    </div>
+
+    <!-- Incoming books -->
+    <h4>Book Devolution</h4>
+    <div class="row">
+        <div class="col-12">
+
+            @foreach (Book book in books)
+            {
+                if (book.MemberId != 1)
+                {
+                    foreach (Member member in members)
+                    {
+                        if (member.MemberId == book.MemberId)
+                        {
+                            <div class="form-inline">
+                                <p>
+                                    <b>@book.Title</b>, currently under <b>@member.Name</b>'s custody.
+
+                                    <a class="oi oi-check text-success" aria-hidden="true"
+                                       @onclick="@( () => Devolution(book.BookId) )" title="Confirm devolution"/>
+                                </p>
+                            </div>
+
+                            <br />
+                        }
+                    }
+                }
+            }
+
         </div>
     </div>
 </div>
@@ -85,27 +123,28 @@
     }
 
     // These will make the connections between book and member
-    protected async Task SetParameters(int memberId, int bookId)
+    protected async Task Rent(int memberId, int bookId)
     {
         member = await crud.GetFromJsonAsync<Member>($"api/Members/{memberId}");
         book = await crud.GetFromJsonAsync<Book>($"api/Books/{bookId}");
+
+        book.MemberId = member.MemberId;
+
+        await crud.PutAsJsonAsync<Book>($"api/Books/{book.BookId}", book);
+
+        await js.InvokeVoidAsync("alert", $"Book {book.Title} is now under {member.Name}'s custody!");
+        await OnInitializedAsync();
     }
 
-    protected async Task Update(int memberId, int bookId)
+    protected async Task Devolution(int bookId)
     {
-        await crud.PutAsJsonAsync<Member>($"api/Members/{memberId}", member);
-        await crud.PutAsJsonAsync<Book>($"api/Books/{bookId}", book);
-    }
+        book = await crud.GetFromJsonAsync<Book>($"api/Books/{bookId}");
 
-    public void Rent(int memberId, int bookId)
-    {
-        SetParameters(memberId, bookId);
+        book.MemberId = 1;
 
-        member.Books.Add(book);
-        book.Custody = member;
+        await crud.PutAsJsonAsync<Book>($"api/Books/{book.BookId}", book);
 
-        Update(memberId, bookId);
-
-        nav.NavigateTo("/transit");
+        await js.InvokeVoidAsync("alert", $"Book {book.Title} is now under library's custody!");
+        await OnInitializedAsync();
     }
 }

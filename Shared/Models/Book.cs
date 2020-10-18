@@ -18,14 +18,7 @@ namespace Library.Shared.Models
         
         public IList<BookCategory> BookCategories { get; set; }
         
-        public Member Custody { get; set; }
-
-        // This is for the One-to-Many Relationship to work
-        protected void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Book>()
-                .HasOne(b => b.Custody)
-                .WithMany(m => m.Books);
-        }
+        public int MemberId { get; set; }
+        public Member Member { get; set; }
     }
 }
