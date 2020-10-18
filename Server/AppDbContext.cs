@@ -21,5 +21,50 @@ namespace Library.Server
         // This here is a list for the accessable "many to many" extra tables
         public DbSet<AuthorBook> AuthorBooks { get; set; }
         public DbSet<BookCategory> BookCategories { get; set; }
+
+        // These are the database relations made by EF Core
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // BOOK - CATEGORY
+            // Setting PK
+            modelBuilder.Entity<BookCategory>()
+                .HasKey(bc => new { bc.BookId, bc.CategoryId });
+
+            // Setting FKs
+            modelBuilder.Entity<BookCategory>()
+                .HasOne(bc => bc.Book)
+                .WithMany(b => b.BookCategories)
+                .HasForeignKey(bc => bc.BookId);
+
+            modelBuilder.Entity<BookCategory>()
+                .HasOne(bc => bc.Category)
+                .WithMany(c => c.BookCategories)
+                .HasForeignKey(bc => bc.CategoryId);
+
+            // AUTHOR - BOOK
+            // Setting PK
+            modelBuilder.Entity<AuthorBook>()
+                .HasKey(ab => new { ab.BookId, ab.AuthorId });
+
+            // Setting FKs
+            modelBuilder.Entity<AuthorBook>()
+                .HasOne(ab => ab.Author)
+                .WithMany(a => a.AuthorBooks)
+                .HasForeignKey(ab => ab.AuthorId);
+
+            modelBuilder.Entity<AuthorBook>()
+                .HasOne(ab => ab.Book)
+                .WithMany(b => b.AuthorBooks)
+                .HasForeignKey(ab => ab.BookId);
+
+            // BOOK - MEMBER
+            modelBuilder.Entity<Book>()
+                .HasOne(b => b.Custody)
+                .WithMany(m => m.Books);
+
+            modelBuilder.Entity<Member>()
+                .HasMany(m => m.Books)
+                .WithOne(b => b.Custody);
+        }
     }
 }
