@@ -6,6 +6,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item active" aria-current="page">Authors</li>
     </ol>
@@ -79,8 +80,20 @@
         await crud.PostAsJsonAsync("api/Authors", author);
         await js.InvokeVoidAsync("alert", $"New author, {author.FirstName} {author.LastName}, added succesfully!");
 
+        // Clear fields
         author.FirstName = "";
         author.LastName = "";
         await OnInitializedAsync();
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for the listing of existing authors and for the creation of new authors. \n\n" +
+            "From a CRUD perspective, this is CR__. \n" +
+            "This page makes use of a component, AuthorForm. I REALLY don't remember why I decided to have the authors creation form on the same page of the list... But, as you can see, there is no way to delete an author, and that is because even after he or she stops writing, the books will still be theirs and carry their names. So, no delete.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

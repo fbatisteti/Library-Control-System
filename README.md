@@ -1,18 +1,12 @@
-TODO
-- confirmar exclusão e retirar de todas as tabelas
-- arrumar para mobile
-- dashboard
-- links em todo lugar
-
 # Library Control System
 
-Simple system to control book flux in a library. Made for college. Won't be updating
+Simple system to control book flux in a library. Made for college. Won't be updating.
 
 ## Description
 
-> Simple library system made in Blazor for a college project. Manages MEMBER, BOOK, AUTHOR and CATEGORY models, with possibilities to add, edit and delete entries.
-> By request, the project must have at least an One-to-One, an One-to-Many, and a Many-to-Many Relationship. 
-> It was decided that authors would not be deleted. Even if an author "ceases to be", every work they previously complete will still be theirs, so it makes no sense to simply "delete" an author from database.
+> Simple library system made in Blazor for a college project. Manages MEMBER, BOOK, AUTHOR and CATEGORY models, with possibilities to add, edit and delete entries.  
+> By request, the project must have at least an One-to-One, an One-to-Many, and a Many-to-Many Relationship.  
+> Final version will __not__ be continued after project deadline. Hopefully, I could make everything functional to an acceptable minimum.
 
 ## Getting Started
 
@@ -28,37 +22,36 @@ Simple system to control book flux in a library. Made for college. Won't be upda
 
 ### Installing
 
-> * How/where to download your program
-> * Any modifications needed to be made to files/folders
+> * Just clone with
+'''
+git clone https://github.com/fbatisteti/Library-Control-System.git
+'''
 
 ### Executing program
 
-> * How to run the program
-> * Step-by-step bullets
-```
-code blocks for commands
-```
-
-## Help
-
-> Any advise for common problems or issues.
-```
-command to run if program contains helper info
-```
+> * If it is the very first use this line of code on root
+'''
+dotnet ef database update
+'''
+> * You can run it from ./Server to make all things work, with code
+'''
+dotnet watch run
+'''
+> * What I do is the following commands as soon as I open the project:
+'''
+cd server;
+cd .. ; dotnet build ; cd server ; dotnet watch run
+'''
+> * With this, everytime I want to refresh the project I just run last command line again once
 
 ## Authors
 
 Fábio Batisteti
 [GitHub: fbatisteti](https://github.com/fbatisteti)
 
-## Version History
-
-* 0.1
-    * Initial Release
-
 ## License
 
-> This project is licensed under the [NAME HERE] License - see the LICENSE.md file for details
+> Use it for whatever you like. No credits needed, but I'm also not responsible for its use :)
 
 ## Acknowledgments
 

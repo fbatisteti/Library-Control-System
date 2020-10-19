@@ -5,6 +5,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item active" aria-current="page">Members</li>
     </ol>
@@ -55,7 +56,7 @@
                         <td>
                             <a class="oi oi-magnifying-glass text-primary" aria-hidden="true" href="members/details/@member.MemberId" />
                             <a class="oi oi-pencil text-warning" aria-hidden="true" href="members/edit/@member.MemberId" />
-                            <a class="oi oi-trash text-danger" aria-hidden="true" href="members/delete/@member.MemberId" />
+                            <a class="oi oi-trash text-danger" aria-hidden="true" @onclick="@( () => DeleteMember(member.MemberId) )" />
                         </td>
                     </tr>
                 }
@@ -67,11 +68,13 @@
 
 @code {
     List<Member> members { get; set; }
+    List<Book> books { get; set; }
 
     // This will get ALL member data from DB
     protected override async Task OnInitializedAsync()
     {
         members = await crud.GetFromJsonAsync<List<Member>>("api/Members");
+        books = await crud.GetFromJsonAsync<List<Book>>("api/Books");
     }
 
     // This will prompt a confirmation to delete entry
@@ -79,10 +82,30 @@
     {
         var member = members.First(x => x.MemberId == MemberId);
 
+        foreach (Book book in books)
+        {
+            if (book.MemberId == MemberId)
+            {
+                await js.InvokeVoidAsync("alert", $"There are one or more books under {member.Name}'s custody. Please, return them first.");
+                return;
+            }
+        }
+
         if (await js.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {member.Name}'s registry?"))
         {
             await crud.DeleteAsync($"api/Members/{MemberId}");
             await OnInitializedAsync();
         }
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for the listing all members. \n\n" +
+            "From a CRUD perspective, this is _R_D, since the operations for deletion are also here. \n" +
+            "The deletion operation will have a simple check to confirm that no books are under to-be-deleted-member's custody.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

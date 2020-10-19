@@ -5,6 +5,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments"/></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item active" aria-current="page">Categories</li>
     </ol>
@@ -109,5 +110,16 @@
             await crud.DeleteAsync($"api/Categories/{CategoryId}");
             await OnInitializedAsync();
         }
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for the creation of new categories/literary genres. \n\n" +
+            "From a CRUD perspective, this is only CR_D. I opted for no updates/editions arbitrarily with no real reason. \n" +
+            "If deleted, all books that opted for this category will simply 'not have' the category anymore.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}"); ;
     }
 }

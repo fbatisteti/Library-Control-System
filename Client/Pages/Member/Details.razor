@@ -1,10 +1,12 @@
 ﻿@page "/members/details/{MemberId:int}"
 @inject HttpClient crud
 @inject NavigationManager nav
+@inject IJSRuntime js
 
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item"><a href="members">Members</a></li>
         <li class="breadcrumb-item active" aria-current="page">Details</li>
@@ -30,7 +32,7 @@
 <!-- History -->
 <div class="card">
     <div class="card-header">
-        Books in Custody
+        Books under @(member.Name)'s Custody
     </div>
     <div class="card-body">
         <p class="card-text">
@@ -45,7 +47,38 @@
                 </thead>
                 <tbody>
 
-                    A
+                    <!-- Checks all books... -->
+                    @foreach (Book book in books)
+                    {
+                        <!-- .. if it's under member custody and, if so... -->
+                        @if(book.MemberId == member.MemberId)
+                        {
+                            <!-- ... print basic stuff... -->
+                            <th scope="row">@book.BookId</th>
+                            <td>@book.Title</td>
+                            <td>
+
+                                <!-- ... then checks authors-books relations... -->
+                                @foreach (AuthorBook authorbook in authorbooks)
+                                {
+                                    <!-- ... to get all authors' ID for that book... -->
+                                    if (authorbook.BookId == book.BookId)
+                                    {
+                                        <!-- ... then checks all authors... -->
+                                        foreach (Author author in authors)
+                                        {
+                                            <!-- ... to print those that are relevant for the book -->
+                                            if (authorbook.AuthorId == author.AuthorId)
+                                            {
+                                                <spam>@author.FirstName @author.LastName |</spam>
+                                            }
+                                        }
+                                    }
+                                }
+
+                            </td>
+                        }
+                    }
 
                 </tbody>
             </table>
@@ -63,11 +96,23 @@
     List<Author> authors = new List<Author>();
     List<Book> books = new List<Book>();
 
+    // This will get lots of information from DB
     protected override async Task OnInitializedAsync()
     {
         member = await crud.GetFromJsonAsync<Member>($"api/Members/{MemberId}");
         authorbooks = await crud.GetFromJsonAsync<List<AuthorBook>>("api/AuthorBooks");
         authors = await crud.GetFromJsonAsync<List<Author>>("api/Authors");
         books = await crud.GetFromJsonAsync<List<Book>>("api/Books");
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for the detailing of existing member (defined by URL). \n\n" +
+            "From a CRUD perspective, this is only _R__. \n" +
+            "In addition to the Member model, this will also mess with the models Author and Book (and the relational table AuthorBook), to show some information about books under set member's custody.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

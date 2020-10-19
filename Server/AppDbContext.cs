@@ -74,7 +74,26 @@ namespace Library.Server
                         MemberId = 1,
                         Name = "[System Member]"
                     }
-            );
+                );
+
+            modelBuilder.Entity<Category>()
+                .HasData(
+                    new Category
+                    {
+                        CategoryId = 1,
+                        Name = "[System Category]"
+                    }
+                );
+
+            modelBuilder.Entity<Author>()
+                .HasData(
+                    new Author
+                    {
+                        AuthorId = 1,
+                        FirstName = "[System",
+                        LastName = "Author]"
+                    }
+                );
         }
     }
 }

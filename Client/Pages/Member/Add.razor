@@ -6,6 +6,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item"><a href="members">Members</a></li>
         <li class="breadcrumb-item active" aria-current="page">Add</li>
@@ -30,5 +31,16 @@
         await crud.PostAsJsonAsync("api/Members", member);
         await js.InvokeVoidAsync("alert", $"New member, {member.Name}, added succesfully!");
         nav.NavigateTo("members");
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for the creation of new members. \n\n" +
+            "From a CRUD perspective, this is only C___. \n" +
+            "This action will make use of a component, MemberForm.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

@@ -6,6 +6,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item"><a href="authors">Authors</a></li>
         <li class="breadcrumb-item active" aria-current="page">Edit</li>
@@ -39,5 +40,16 @@
         await crud.PutAsJsonAsync<Author>($"api/Authors/{AuthorId}", author);
         await js.InvokeVoidAsync("alert", $"Registry updated succesfully!");
         nav.NavigateTo("authors");
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for updating one defined author (set by URL). \n\n" +
+            "From a CRUD perspective, this is _rU_ (small R because it IS used). \n" +
+            "This page makes use of a component, AuthorForm. And could have been the same as Add Author, just like it is for members...";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

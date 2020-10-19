@@ -6,6 +6,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item"><a href="members">Members</a></li>
         <li class="breadcrumb-item active" aria-current="page">Edit</li>
@@ -39,5 +40,16 @@
         await crud.PutAsJsonAsync<Member>($"api/Members/{MemberId}", member);
         await js.InvokeVoidAsync("alert", $"Registry updated succesfully!");
         nav.NavigateTo("members");
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for the edition of existing member (defined by URL). \n\n" +
+            "From a CRUD perspective, this is _rU_ (small R because it IS used). \n" +
+            "This action will make us of a componente, MemberForm, as this is a copy and paste of the Add page.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

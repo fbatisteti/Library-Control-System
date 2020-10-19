@@ -2,9 +2,11 @@
 @inject HttpClient crud
 @inject NavigationManager nav
 @inject IJSRuntime js
+
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item"><a href="authors">Authors</a></li>
         <li class="breadcrumb-item active" aria-current="page">Manage Books</li>
@@ -39,42 +41,50 @@
             </thead>
             <tbody>
 
-                <!-- Basically, checks all the AUTHORBOOKS relations... -->
+                <!-- Checks all author-book relations... -->
                 @foreach (AuthorBook authorbook in authorbooks)
                 {
-                    <!-- ... to find the page's author... -->
+                    <!-- ... to pick those that are the author's... -->
                     if (authorbook.AuthorId == author.AuthorId)
                     {
-                        <!-- ... to get that entry's book data... -->
+                        <!-- ... then go check all books... -->
                         foreach (Book book in books)
                         {
+                            <!-- ... if they are the books from the relation... -->
                             if (book.BookId == authorbook.BookId)
                             {
-                                <!-- ... and print the table row -->
+                                <!-- ... and print a new line in table -->
                                 <tr>
                                     <th scope="row">@book.BookId</th>
                                     <td>@book.Title</td>
                                     <td>
+
+                                        <!-- While printing the authors' names, will check again the relations... -->
                                         @foreach (AuthorBook authorbook2 in authorbooks)
                                         {
+                                            <!-- ... but now it will pick the authors' based on the book... -->
                                             if (authorbook2.BookId == book.BookId)
                                             {
+                                                <!-- ... then check all authors... -->
                                                 foreach (Author author2 in authors)
                                                 {
+                                                    <!-- ... to see if their name will be added or not... -->
                                                     if (author2.AuthorId == authorbook2.AuthorId)
                                                     {
+                                                        <!-- ... muted if it's the page's and normal if not -->
                                                         if (@author.AuthorId == author2.AuthorId)
                                                         {
-                                                            <spam class="text-muted">@author2.FirstName @author2.LastName |</spam>
+                                                            <spam class="text-muted">| @author2.FirstName @author2.LastName |</spam>
                                                         }
                                                         else
                                                         {
-                                                            <spam>@author2.FirstName @author2.LastName |</spam>
+                                                            <spam>| @author2.FirstName @author2.LastName |</spam>
                                                         }
                                                     }
                                                 }
                                             }
                                         }
+
                                     </td>
                                     <td>
                                         <a class="oi oi-action-undo text-danger" aria-hidden="true"
@@ -115,7 +125,7 @@
             </thead>
             <tbody>
 
-                <!-- Basically, checks all the books... -->
+                <!-- Checks all the books... -->
                 @foreach (Book book in books)
                 {
                     var show = true;
@@ -123,19 +133,22 @@
                     <!-- ... to see if it is the author's... -->
                     foreach (AuthorBook authorbook in authorbooks)
                     {
+                        <!-- ... and if it is, set the "show" variable to, well, "not show"... -->
                         if (authorbook.BookId == book.BookId && authorbook.AuthorId == author.AuthorId)
                         {
                             show = false;
                         }
                     }
 
-                    <!-- ... and, if not, print it -->
+                    <!-- ... and, incase it isn't the authors', print it -->
                     if (show)
                     {
                         <tr>
                             <th scope="row">@book.BookId</th>
                             <td>@book.Title</td>
                             <td>
+
+                                <!-- With all the other authors -->
                                 @foreach (AuthorBook authorbook2 in authorbooks)
                                 {
                                     if (authorbook2.BookId == book.BookId)
@@ -144,11 +157,12 @@
                                         {
                                             if (author2.AuthorId == authorbook2.AuthorId)
                                             {
-                                                <spam>@author2.FirstName @author2.LastName |</spam>
+                                                <spam>| @author2.FirstName @author2.LastName |</spam>
                                             }
                                         }
                                     }
                                 }
+
                             </td>
                             <td>
                                 <a class="oi oi-action-redo text-success" aria-hidden="true"
@@ -183,14 +197,6 @@
         authorbooks = await crud.GetFromJsonAsync<List<AuthorBook>>("api/AuthorBooks");
     }
 
-    // This will update the author data
-    async Task UpdateAuthor(int AuthorId, Author Author)
-    {
-        await crud.PutAsJsonAsync<Author>($"api/Authors/{AuthorId}", author);
-        await js.InvokeVoidAsync("alert", $"Books linked to author succesfully!");
-        nav.NavigateTo("authors");
-    }
-
     // This will update the relations between the author and books
     async Task AddBook(int BookId, int AuthorId)
     {
@@ -214,5 +220,16 @@
                 await OnInitializedAsync();
             }
         }
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for managing the book list for one defined author (set by URL). \n\n" +
+            "From a CRUD perspective, this is the full CRUD. \n" +
+            "By far, the page I liked most doing and checking the final product. It makes full use of the CRUD functions... kind of. It simulates the R part with a C and a D, but that's how it worked. The updates are in real time and there is no confirmation button.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }
