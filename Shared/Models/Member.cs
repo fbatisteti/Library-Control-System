@@ -16,6 +16,8 @@ namespace Library.Shared.Models
 
         public string Notes { get; set; }
 
+        public History History { get; set; }
+
         public IList<Book> Books { get; set; }
     }
 }

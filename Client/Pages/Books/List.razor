@@ -5,6 +5,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item active" aria-current="page">Books</li>
     </ol>
@@ -46,22 +47,22 @@
             </thead>
             <tbody>
 
-                <!-- Basically, gets the BOOK to show book data... -->
+                <!-- Look at each book created... -->
                 @foreach (Book book in books)
                 {
                     <tr>
-                        <!-- ... print basic stuff... -->
+                        <!-- ... to print basic stuff... -->
                         <th scope="row">@book.BookId</th>
                         <td>@book.Title</td>
                         <td>
 
-                            <!-- ... then checks all the AUTHORBOOKS relations... -->
+                            <!-- ... and go check the related authors... -->
                             @foreach (AuthorBook authorbook in authorbooks)
                             {
                                 <!-- ... to see if it has someone linked to the book... -->
                                 if (authorbook.BookId == book.BookId)
                                 {
-                                    <!-- ... and, if it does, check all the AUTHORS... -->
+                                    <!-- ... and, if it does, check all the authors... -->
                                     foreach (Author author in authors)
                                     {
                                         <!-- ... and compare with the author's id in the relations... -->
@@ -76,7 +77,7 @@
                         </td>
                         <td>
                             <a class="oi oi-pencil text-warning" aria-hidden="true" href="books/edit/@book.BookId" />
-                            <a class="oi oi-trash text-danger" aria-hidden="true" href="books/delete/@book.BookId" />
+                            <a class="oi oi-trash text-danger" aria-hidden="true" @onclick="@( () => DeleteBook(book.BookId) )" />
                         </td>
                     </tr>
                 }
@@ -100,14 +101,31 @@
     }
 
     // This will prompt a confirmation to delete entry
-    async Task DeleteMember(int BookId)
+    async Task DeleteBook(int BookId)
     {
         var book = books.First(x => x.BookId == BookId);
 
-        if (await js.InvokeAsync<bool>("confirm", $"Are you sure you want to delete 's registry?"))
+        if (book.MemberId != 1)
+        {
+            await js.InvokeVoidAsync("alert", $"A member has custody of this book. Please, have it returned first.");
+            return;
+        }
+
+        if (await js.InvokeAsync<bool>("confirm", $"Are you sure you want to delete {book.Title}'s registry?"))
         {
             await crud.DeleteAsync($"api/Books/{BookId}");
             await OnInitializedAsync();
         }
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for listing all books. \n\n" +
+            "From a CRUD perspective, this is the _R_D. \n" +
+            "The deletion will take place in this same page, with only rule being that a book can't be deleted from the library if it is rented to a member.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

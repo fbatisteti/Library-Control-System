@@ -6,6 +6,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item"><a href="books">Books</a></li>
         <li class="breadcrumb-item active" aria-current="page">Add</li>
@@ -158,5 +159,16 @@
         // Finally, it states it's done
         await js.InvokeVoidAsync("alert", $"New book, {book.Title}, added succesfully!");
         nav.NavigateTo("books");
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for adding new books. \n\n" +
+            "From a CRUD perspective, this is the CR__. \n" +
+            "This is another page that links a lot of models, namely Books, Authors and Categories. It makes lots of new entires on the database everytime a new book is created.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

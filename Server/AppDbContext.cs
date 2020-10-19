@@ -17,6 +17,7 @@ namespace Library.Server
         public DbSet<Book> Books { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Member> Members { get; set; }
+        public DbSet<History> Histories { get; set; }
 
         // This here is a list for the accessable "many to many" extra tables
         public DbSet<AuthorBook> AuthorBooks { get; set; }
@@ -66,6 +67,12 @@ namespace Library.Server
                 .HasOne(b => b.Member)
                 .WithMany(m => m.Books);
 
+            // MEMBER - HISTORY
+            modelBuilder.Entity<Member>()
+                .HasOne(m => m.History)
+                .WithOne(h => h.Member)
+                .HasForeignKey<History>(h => h.MemberId);
+
             // SEEDING
             modelBuilder.Entity<Member>()
                 .HasData(
@@ -73,6 +80,16 @@ namespace Library.Server
                     {
                         MemberId = 1,
                         Name = "[System Member]"
+                    }
+                );
+
+            modelBuilder.Entity<History>()
+                .HasData(
+                    new History
+                    {
+                        HistoryId = 1,
+                        List = "[System History]",
+                        MemberId = 1
                     }
                 );
 

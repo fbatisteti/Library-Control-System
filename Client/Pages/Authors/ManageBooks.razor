@@ -209,13 +209,10 @@
 
     async Task RemoveBook(int BookId, int AuthorId)
     {
-        Console.WriteLine("A");
         foreach (AuthorBook authorbook in authorbooks)
         {
-            Console.WriteLine("B");
             if (authorbook.AuthorId == AuthorId && authorbook.BookId == BookId)
             {
-                Console.WriteLine("C");
                 await crud.DeleteAsync($"api/AuthorBooks/{authorbook.Id}");
                 await OnInitializedAsync();
             }

@@ -29,6 +29,14 @@
     async Task CreateMember()
     {
         await crud.PostAsJsonAsync("api/Members", member);
+
+        // Creating a history entry for that member
+        List<Member> temp = await crud.GetFromJsonAsync<List<Member>>("api/Members");
+        var lastItem = temp[temp.Count - 1];
+        History history = new History();
+        history.MemberId = lastItem.MemberId;
+        await crud.PostAsJsonAsync("api/Histories", history);
+
         await js.InvokeVoidAsync("alert", $"New member, {member.Name}, added succesfully!");
         nav.NavigateTo("members");
     }

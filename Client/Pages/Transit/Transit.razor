@@ -6,6 +6,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item active" aria-current="page">Transit</li>
     </ol>
@@ -92,7 +93,7 @@
                                     <b>@book.Title</b>, currently under <b>@member.Name</b>'s custody.
 
                                     <a class="oi oi-check text-success" aria-hidden="true"
-                                       @onclick="@( () => Devolution(book.BookId) )" title="Confirm devolution"/>
+                                       @onclick="@( () => Devolution(member.MemberId, book.BookId) )" title="Confirm devolution"/>
                                 </p>
                             </div>
 
@@ -111,6 +112,7 @@
     List<Book> books = new List<Book>();
     Member member = new Member();
     List<Member> members = new List<Member>();
+    History history = new History();
 
     int selectedMember;
     int selectedBook;
@@ -127,24 +129,41 @@
     {
         member = await crud.GetFromJsonAsync<Member>($"api/Members/{memberId}");
         book = await crud.GetFromJsonAsync<Book>($"api/Books/{bookId}");
+        history = await crud.GetFromJsonAsync<History>($"api/Histories/{memberId}");
 
         book.MemberId = member.MemberId;
+        history.List = history.List + $"RENTAL: {DateTime.Now} - {book.Title} ||";
 
         await crud.PutAsJsonAsync<Book>($"api/Books/{book.BookId}", book);
+        await crud.PutAsJsonAsync<History>($"api/Histories/{memberId}", history);
 
         await js.InvokeVoidAsync("alert", $"Book {book.Title} is now under {member.Name}'s custody!");
         await OnInitializedAsync();
     }
 
-    protected async Task Devolution(int bookId)
+    protected async Task Devolution(int memberId, int bookId)
     {
         book = await crud.GetFromJsonAsync<Book>($"api/Books/{bookId}");
+        history = await crud.GetFromJsonAsync<History>($"api/Histories/{memberId}");
 
         book.MemberId = 1;
+        history.List = history.List + $"DEVOLUTION: {DateTime.Now} - {book.Title} ||";
 
         await crud.PutAsJsonAsync<Book>($"api/Books/{book.BookId}", book);
+        await crud.PutAsJsonAsync<History>($"api/Histories/{memberId}", history);
 
         await js.InvokeVoidAsync("alert", $"Book {book.Title} is now under library's custody!");
         await OnInitializedAsync();
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for the book transit. \n\n" +
+            "From a CRUD perspective, this is _RU_. \n" +
+            "This page is to make the links for the One-to-Many Relationship between Books and Members.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

@@ -6,6 +6,7 @@
 <!-- Breadcrumb -->
 <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
+        <li class="breadcrumb-item"><span class="oi oi-question-mark text-info" aria-hidden="true" title="Comments about this page" @onclick="@Comments" /></li>
         <li class="breadcrumb-item"><a href="#">Home</a></li>
         <li class="breadcrumb-item"><a href="books">Books</a></li>
         <li class="breadcrumb-item active" aria-current="page">Edit</li>
@@ -80,7 +81,7 @@
             <br />
 
             <button type="submit" class="btn btn-outline-success">
-                Add Book
+                Update Book
             </button>
 
         </div>
@@ -221,5 +222,16 @@
         // Finally, it states it's done
         await js.InvokeVoidAsync("alert", $"Book updated succesfully!");
         nav.NavigateTo("books");
+    }
+
+    // Comments
+    public async Task Comments()
+    {
+        string comments =
+            "This page is for editing existing books (set by URL). \n\n" +
+            "From a CRUD perspective, this is the full CRUD. \n" +
+            "Another nice page with lots of things happening at once. It (R) reads stuff, (U) update basic book info, (D) deletes old relations (EVERY SINGLE TIME the update button is hit) and (C) create new relations. There should be an easier way to do this, but eh, it IS working properly.";
+
+        await js.InvokeVoidAsync("alert", $"{comments}");
     }
 }

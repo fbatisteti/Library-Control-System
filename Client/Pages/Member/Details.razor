@@ -29,7 +29,7 @@
 
 <br />
 
-<!-- History -->
+<!-- Rentals -->
 <div class="card">
     <div class="card-header">
         Books under @(member.Name)'s Custody
@@ -87,6 +87,22 @@
     </div>
 </div>
 
+<br />
+
+<!-- History -->
+<div class="card">
+    <div class="card-header">
+        History
+    </div>
+    <div class="card-body">
+        <ul>
+
+            @history.List
+
+        </ul>
+    </div>
+</div>
+
 
 @code {
     [Parameter] public int MemberId { get; set; }
@@ -95,6 +111,7 @@
     List<AuthorBook> authorbooks = new List<AuthorBook>();
     List<Author> authors = new List<Author>();
     List<Book> books = new List<Book>();
+    History history = new History();
 
     // This will get lots of information from DB
     protected override async Task OnInitializedAsync()
@@ -103,6 +120,7 @@
         authorbooks = await crud.GetFromJsonAsync<List<AuthorBook>>("api/AuthorBooks");
         authors = await crud.GetFromJsonAsync<List<Author>>("api/Authors");
         books = await crud.GetFromJsonAsync<List<Book>>("api/Books");
+        history = await crud.GetFromJsonAsync<History>($"api/Histories/{MemberId}");
     }
 
     // Comments
