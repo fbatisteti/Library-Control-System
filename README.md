@@ -29,25 +29,28 @@ On this version, the overall design and layout was not a primary (or even second
 ### Installing
 
 Just clone with
-´´´
+```shell
 git clone https://github.com/fbatisteti/Library-Control-System.git
-´´´
+```
 
 ### Executing program
 
 If it is the very first use this line of code on root
-´´´
+```shell
 dotnet ef database update
-´´´
+```
+
 You can run it from ./Server to make all things work, with code
-´´´
+```shell
 dotnet watch run
-´´´
+```
+
 What I do is the following commands as soon as I open the project:
-´´´
+```shell
 cd server;
 cd .. ; dotnet build ; cd server ; dotnet watch run
-´´´
+```
+
 With this, everytime I want to refresh the project I just run last command line again once
 
 ## Authors
@@ -60,4 +63,4 @@ Use it for whatever you like. No credits needed, but I'm also not responsible fo
 
 ## Acknowledgments
 
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
+* [awesome-readme](https://github.com/matiassingers/awesome-readme) (for the ReadMe stuff)
